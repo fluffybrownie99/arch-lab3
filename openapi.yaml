@@ -58,10 +58,6 @@ paths:
                 uploadTimestamp:
                   type: string
                   format: date-time
-                # deviceId:
-                #   type: string
-                #   format: uuid
-                #   description: Device unique identifer.
   /home/media/playback:
     post:
       tags:
