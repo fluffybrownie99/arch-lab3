@@ -1,6 +1,5 @@
 import connexion
 from connexion import NoContent
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from base import Base
@@ -16,14 +15,16 @@ DB_ENGINE = create_engine('sqlite:///media_server.db')  # Connect to your SQLite
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
-def media_upload(body, deviceId):
+def media_upload(body):
+    #this makes sure time is properly formatted for the database.
     upload_timestamp = datetime.datetime.strptime(body['uploadTimestamp'], '%Y-%m-%d %H:%M:%S')
     session = DB_SESSION()
     new_upload = MediaUpload(
-        deviceId=deviceId,
         fileSize=body['fileSize'],
         mediaType=body['mediaType'],
         uploadTimestamp=upload_timestamp,
+        userID=body['userID'],
+        trace_id=body['trace_id']
     )
     session.add(new_upload)
     session.commit()
@@ -31,19 +32,19 @@ def media_upload(body, deviceId):
         "mediaId": str(new_upload.id)
     }
     session.close()
+    #Cant return NoContent due to strict validation 
     return response, 201
 
-def media_playback(body, deviceId):
+def media_playback(body):
     session = DB_SESSION()
     playback_start_time = datetime.datetime.strptime(body['playbackStartTime'], '%Y-%m-%d %H:%M:%S')
     new_playback = MediaPlayback(
-        deviceId=deviceId,
         mediaId=body['mediaId'],
         playbackStartTime=playback_start_time,
         userID=body['userID'],
         playbackId=body['playbackId'],
         playbackDuration=body.get('playbackDuration', None),
-        # Add other fields as necessary
+        trace_id=body['trace_id']
     )
     session.add(new_playback)
     session.commit()
@@ -52,7 +53,6 @@ def media_playback(body, deviceId):
     }
     session.close()
     return NoContent, 201
-
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')

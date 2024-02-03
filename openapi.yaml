@@ -30,13 +30,6 @@ paths:
                     description: Unique identifier for uploaded media.
         '400':
           description: Invalid input, object invalid
-      parameters:
-        - in: query
-          name: deviceId
-          description: ID of the uploading device
-          required: true
-          schema:
-            type: string
       requestBody:
         required: true
         content:
@@ -58,6 +51,17 @@ paths:
                 uploadTimestamp:
                   type: string
                   format: date-time
+                userID:
+                  type: string
+                  format: uuid
+                  description: Unique user identifier.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+                trace_id:
+                  type: string
+                  format: uuid
+                  description: Unique user identifier.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+
   /home/media/playback:
     post:
       tags:
@@ -70,13 +74,6 @@ paths:
           description: Playback data successfully recorded
         '400':
           description: Invalid input
-      parameters:
-        - in: query
-          name: deviceId
-          description: ID of the playback device
-          required: true
-          schema:
-            type: string
       requestBody:
         required: true
         content:
@@ -107,3 +104,8 @@ paths:
                   format: int32
                   description: Duration of the playback in seconds.
                   example: 3600
+                trace_id:
+                  type: string
+                  format: uuid
+                  description: Unique user identifier.
+                  example: "123e4567-e89b-12d3-a456-426614174000"
