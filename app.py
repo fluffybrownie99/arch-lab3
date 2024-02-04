@@ -7,12 +7,12 @@ from update_event_data import update_event_data
 from media_upload import MediaUpload
 from media_playback import MediaPlayback
 
-with open('log_conf.yml', 'r') as f:
-    log_config = yaml.safe_load(f.read())
-    logging.config.dictConfig(log_config)
+# with open('log_conf.yml', 'r') as f:
+#     log_config = yaml.safe_load(f.read())
+#     logging.config.dictConfig(log_config)
     
-logger = logging.getLogger('basicLogger')
-logger.setLevel(logging.DEBUG)
+# logger = logging.getLogger('basicLogger')
+
 
 #Receiver DB Setup for credentials (Load info from app_conf.yml, add as dict, access values)
 with open('app_conf.yml', 'r') as config_file:
@@ -47,9 +47,10 @@ def media_upload(body):
         "mediaId": str(new_upload.id)
     }
     session.close()
-    logger.info(f'Stored event "media_upload" request with a trace id of {body["trace_id"]}')
+    # logger.info(f'Stored event "media_upload" request with a trace id of {body["trace_id"]}')
     #Cant return NoContent due to strict validation 
-    return response.json(), response.status_code
+    return response, 201 
+
 
 def media_playback(body):
     session = DB_SESSION()
@@ -68,8 +69,9 @@ def media_playback(body):
         "userID":str(new_playback.userID)
     }
     session.close()
-    logger.info(f'Stored event "media_playback" request with a trace id of {body["trace_id"]}')
-    return response.json(), response.status_code
+    # logger.info(f'Stored event "media_playback" request with a trace id of {body["trace_id"]}')
+    return response, 201  
+
 
 
 app = connexion.FlaskApp(__name__, specification_dir='')
