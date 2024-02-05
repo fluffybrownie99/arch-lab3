@@ -54,29 +54,30 @@ db_cursor = db_conn.cursor()
 # Create the media_uploads table with adjustments
 db_cursor.execute('''
     CREATE TABLE IF NOT EXISTS media_uploads(
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        id INT NOT NULL AUTO_INCREMENT,
         fileSize INT NOT NULL,
         mediaType ENUM('Photo', 'Video') NOT NULL,
         uploadTimestamp DATETIME NOT NULL,
-        userID CHAR(36) NOT NULL,
+        userID BINARY(16) NOT NULL,
         date_created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-        trace_id CHAR(36) NOT NULL
+        trace_id BINARY(16) NOT NULL,
+        CONSTRAINT media_uploads_pk PRIMARY KEY (id)
     )
 ''')
 
 # Create the media_playbacks table with adjustments
 db_cursor.execute('''
     CREATE TABLE IF NOT EXISTS media_playbacks(
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        id INT NOT NULL AUTO_INCREMENT,
         mediaId INT NOT NULL,
         playbackStartTime DATETIME NOT NULL,
-        userID CHAR(36) NOT NULL,
+        userID BINARY(16) NOT NULL,
         playbackId INT NOT NULL,
         playbackDuration INT,
         date_created DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
-        trace_id CHAR(36) NOT NULL,
-        FOREIGN KEY (mediaId) REFERENCES media_uploads(id)
-    )
+        trace_id BINARY(16) NOT NULL,
+        CONSTRAINT media_playback_pk PRIMARY KEY (id)
+);
 ''')
 
 # Commit the changes to the database and close the connection

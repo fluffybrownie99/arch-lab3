@@ -7,11 +7,11 @@ from update_event_data import update_event_data
 from media_upload import MediaUpload
 from media_playback import MediaPlayback
 
-# with open('log_conf.yml', 'r') as f:
-#     log_config = yaml.safe_load(f.read())
-#     logging.config.dictConfig(log_config)
+with open('log_conf.yml', 'r') as f:
+    log_config = yaml.safe_load(f.read())
+    logging.config.dictConfig(log_config)
     
-# logger = logging.getLogger('basicLogger')
+logger = logging.getLogger('basicLogger')
 
 
 #Receiver DB Setup for credentials (Load info from app_conf.yml, add as dict, access values)
@@ -23,10 +23,8 @@ db_password = db_config['password']
 db_hostname = db_config['hostname']
 db_port = db_config.get('port', 3306)  # Provide a default port if not specified
 db_name = db_config['db']
-
+# DB Connection
 DB_ENGINE = create_engine(f'mysql+pymysql://{db_user}:{db_password}@{db_hostname}:{db_port}/{db_name}')
-
-# DB_ENGINE = create_engine('sqlite:///media_server.db')  # Connect to your SQLite database
 Base.metadata.bind = DB_ENGINE
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
@@ -47,7 +45,7 @@ def media_upload(body):
         "mediaId": str(new_upload.id)
     }
     session.close()
-    # logger.info(f'Stored event "media_upload" request with a trace id of {body["trace_id"]}')
+    logger.info(f'Stored event "media_upload" request with a trace id of {body["trace_id"]}')
     #Cant return NoContent due to strict validation 
     return response, 201 
 
@@ -69,7 +67,7 @@ def media_playback(body):
         "userID":str(new_playback.userID)
     }
     session.close()
-    # logger.info(f'Stored event "media_playback" request with a trace id of {body["trace_id"]}')
+    logger.info(f'Stored event "media_playback" request with a trace id of {body["trace_id"]}')
     return response, 201  
 
 
