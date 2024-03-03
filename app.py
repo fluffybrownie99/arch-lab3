@@ -6,7 +6,8 @@ from base import Base
 from update_event_data import update_event_data
 from media_upload import MediaUpload
 from media_playback import MediaPlayback
-
+from operator import and_
+#loading log conf
 with open('log_conf.yml', 'r') as f:
     log_config = yaml.safe_load(f.read())
     logging.config.dictConfig(log_config)
@@ -37,6 +38,7 @@ def media_upload(body):
         mediaType=body['mediaType'],
         uploadTimestamp=upload_timestamp,
         userID=body['userID'],
+        date_created=datetime.datetime.now(),
         trace_id=body['trace_id']
     )
     session.add(new_upload)
@@ -45,8 +47,7 @@ def media_upload(body):
         "mediaId": str(new_upload.id)
     }
     session.close()
-    logger.info(f'Stored event "media_upload" request with a trace id of {body["trace_id"]}')
-    #Cant return NoContent due to strict validation 
+    logger.debug(f'Stored event "media_upload" request with a trace id of {body["trace_id"]}')
     return response, 201 
 
 
@@ -59,6 +60,7 @@ def media_playback(body):
         userID=body['userID'],
         playbackId=body['playbackId'],
         playbackDuration=body.get('playbackDuration', None),
+        date_created=datetime.datetime.now(),
         trace_id=body['trace_id']
     )
     session.add(new_playback)
@@ -67,11 +69,43 @@ def media_playback(body):
         "userID":str(new_playback.userID)
     }
     session.close()
-    logger.info(f'Stored event "media_playback" request with a trace id of {body["trace_id"]}')
+    logger.debug(f'Stored event "media_playback" request with a trace id of {body["trace_id"]}')
     return response, 201  
 
+def get_media_upload_events(start_timestamp, end_timestamp):
+    """ Gets new media upload readings between the start and end timestamps """
+    session = DB_SESSION()
+    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
+    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, '%Y-%m-%d %H:%M:%S')
+    # Filter results by start time and end time
+    results = session.query(MediaUpload).filter(
+    and_(MediaUpload.date_created >= start_timestamp_datetime,
+    MediaUpload.date_created < end_timestamp_datetime))
+    results_list = []
+    for reading in results:
+        results_list.append(reading.to_dict())
+    session.close()
+    logger.info("Query for Media Uploads after %s returns %d results" % (start_timestamp, len(results_list)))
+    return results_list, 200
 
 
+def get_media_playback_events(start_timestamp, end_timestamp):
+    """ Gets new media playback readings between the start and end timestamps """
+    session = DB_SESSION()
+    start_timestamp_datetime = datetime.datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
+    end_timestamp_datetime = datetime.datetime.strptime(end_timestamp, '%Y-%m-%d %H:%M:%S')
+    # Filter results by start time and end time
+    results = session.query(MediaPlayback).filter(
+    and_(MediaPlayback.date_created >= start_timestamp_datetime,
+    MediaPlayback.date_created < end_timestamp_datetime))
+    results_list = []
+    for result in results:
+        results_list.append(result.to_dict())
+    session.close()
+    logger.info("Query for Media Playbacks after %s returns %d results" % (start_timestamp, len(results_list)))
+    return results_list, 200
+
+# Connexion and Flask stuff
 app = connexion.FlaskApp(__name__, specification_dir='')
 #specification_dir is where to look for OpenAPI specifications. Empty string means
 #look in the current directory
