@@ -48,7 +48,7 @@
 import mysql.connector
 
 # Connect to the MySQL database
-db_conn = mysql.connector.connect(host="localhost", user="ram", password="Password", database="arch")
+db_conn = mysql.connector.connect(host="acit3855audit.westus3.cloudapp.azure.com", user="ram", password="Password", database="arch")
 db_cursor = db_conn.cursor()
 
 # Create the media_uploads table with adjustments
